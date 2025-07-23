@@ -29,11 +29,12 @@ public class User {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    // Domyślny konstruktor wymagany przez Hibernate
+    @Column(nullable = false)
+    private double energyCostPerKwh = 0.9;
+
     public User() {
     }
 
-    // Konstruktor z argumentami
     public User(String name, String email, String hashedPassword, Role role) {
         this.username = name;
         this.email = email;

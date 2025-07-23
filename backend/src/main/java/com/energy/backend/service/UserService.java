@@ -53,4 +53,16 @@ public class UserService {
     public User findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
+
+    //setEnergyCostPerKwh
+    public void setEnergyCostPerKwh(Long userId, double energyCostPerKwh) {
+        User user = findById(userId);
+        user.setEnergyCostPerKwh(energyCostPerKwh);
+        userRepository.save(user);
+    }
+
+    public User findById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Użytkownik o podanym ID nie istnieje"));
+    }
 }

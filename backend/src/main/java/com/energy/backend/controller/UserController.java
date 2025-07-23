@@ -4,6 +4,7 @@ import com.energy.backend.model.User;
 import com.energy.backend.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,5 +51,19 @@ public class UserController {
     @PreAuthorize("hasAuthority('ADMIN')")
     public List<User> getUsersByRole(@PathVariable User.Role role) {
         return userRepository.findByRole(role);
+    }
+
+    @PutMapping("/set-energy-cost")
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')") 
+    public ResponseEntity<?> setEnergyCost(@RequestParam double energyCostPerKwh) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            return ResponseEntity.status(403).body("User not found");
+        }
+
+        user.setEnergyCostPerKwh(energyCostPerKwh);
+        userRepository.save(user);
+        return ResponseEntity.ok("Energy cost updated successfully");
     }
 }
