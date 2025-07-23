@@ -61,6 +61,10 @@ public class DeviceController {
         double dailyEnergyKwh = (device.getPowerWatt() / 1000.0) * device.getDailyUsageHours();
         double cost = dailyEnergyKwh * energyCostPerKwh;
 
+        cost = new java.math.BigDecimal(cost)
+            .setScale(2, java.math.RoundingMode.HALF_UP)
+            .doubleValue();
+
         EnergyUsage energyUsage = new EnergyUsage();
         energyUsage.setDevice(savedDevice);
         energyUsage.setDate(LocalDate.now());

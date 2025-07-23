@@ -26,26 +26,6 @@ public class EnergyUsageController {
         this.userService = userService;
     }
 
-    // Dodaj dane zużycia energii dla urządzenia
-    @PostMapping("/{deviceId}")
-    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
-    public ResponseEntity<EnergyUsage> addEnergyUsage(@PathVariable Long deviceId, @RequestBody EnergyUsage energyUsage) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User loggedInUser = userService.findByEmail(email);
-
-        if (loggedInUser == null) {
-            return ResponseEntity.status(403).build();
-        }
-
-        var device = deviceService.findById(deviceId);
-        if (device == null || !device.getUser().getId().equals(loggedInUser.getId())) {
-            return ResponseEntity.status(403).build();
-        }
-
-        energyUsage.setDevice(device);
-        EnergyUsage savedEnergyUsage = energyUsageService.saveEnergyUsage(energyUsage);
-        return ResponseEntity.ok(savedEnergyUsage);
-    }
 
     // Pobierz dane zużycia energii dla urządzenia
     @GetMapping("/{deviceId}")
@@ -109,4 +89,17 @@ public class EnergyUsageController {
         energyUsageService.deleteEnergyUsage(energyUsageId);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/generate-missing")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> generateMissingEnergyUsageForAllDevices() {
+        try {
+            energyUsageService.generateMissingEnergyUsageForAllDevices();
+            return ResponseEntity.ok("Missing energy usage entries generated successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("An error occurred: " + e.getMessage());
+        }
+    }
+
+
 }
