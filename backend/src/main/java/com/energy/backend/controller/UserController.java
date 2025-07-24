@@ -66,4 +66,15 @@ public class UserController {
         userRepository.save(user);
         return ResponseEntity.ok("Energy cost updated successfully");
     }
+
+    @GetMapping("/me")
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
+    public ResponseEntity<?> getCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(user);
+    }
 }

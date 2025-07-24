@@ -15,6 +15,7 @@ import {
   IconSearch,
   IconSettings,
   IconUsers,
+  IconDevices,
 } from "@tabler/icons-react"
 
 import { NavDocuments } from "~/components/nav-documents"
@@ -31,6 +32,8 @@ import {
   SidebarMenuItem,
 } from "~/components/ui/sidebar"
 
+import { useAuth } from "~/auth/useAuth.tsx"
+
 const data = {
   user: {
     name: "shadcn",
@@ -40,26 +43,26 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/dashboard",
       icon: IconDashboard,
     },
     {
-      title: "Lifecycle",
-      url: "#",
-      icon: IconListDetails,
+      title: "Devices",
+      url: "/devices",
+      icon: IconDevices,
     },
     {
       title: "Analytics",
-      url: "#",
+      url: "/analytics",
       icon: IconChartBar,
     },
     {
-      title: "Projects",
+      title: "?Categories",
       url: "#",
       icon: IconFolder,
     },
     {
-      title: "Team",
+      title: "?",
       url: "#",
       icon: IconUsers,
     },
@@ -120,7 +123,7 @@ const data = {
     },
     {
       title: "Get Help",
-      url: "#",
+      url: "https://github.com/LukasZaw/energy-monitor-app/tree/main/frontend",
       icon: IconHelp,
     },
     {
@@ -140,15 +143,12 @@ const data = {
       url: "#",
       icon: IconReport,
     },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: IconFileWord,
-    },
   ],
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { user } = useAuth();
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -158,9 +158,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <a href="#">
+              <a href="/dashboard">
                 <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
+                <span className="text-base font-semibold">Power Monitor</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -172,7 +172,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        {user && <NavUser user={user} />}
       </SidebarFooter>
     </Sidebar>
   )

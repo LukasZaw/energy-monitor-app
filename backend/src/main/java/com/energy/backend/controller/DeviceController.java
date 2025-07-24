@@ -126,4 +126,16 @@ public class DeviceController {
         deviceService.deleteDevice(deviceId);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/user/me")
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
+    public ResponseEntity<List<Device>> getDevicesForCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userService.findByEmail(email);
+        if (user == null) {
+            return ResponseEntity.status(403).build();
+        }
+        List<Device> devices = deviceService.findDevicesByUserId(user.getId());
+        return ResponseEntity.ok(devices);
+    }
 }

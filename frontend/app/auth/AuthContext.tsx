@@ -2,8 +2,10 @@ import React, { createContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { jwtDecode } from "jwt-decode";
 import { saveToken, getToken, removeToken } from './tokenUtils';
+import { fetchCurrentUser } from '~/lib/axios';
 
 type User = {
+  name: string;
   email: string;
   role: string;
 };
@@ -31,17 +33,22 @@ interface DecodedToken {
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(getToken());
+  const [username, setUsername] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     if (token) {
       try {
         const decoded = jwtDecode<DecodedToken>(token);
-        setUser({
-          email: decoded.sub,
-          role: decoded.role || decoded.authorities?.[0] || '',
-        });
         saveToken(token);
+
+        fetchCurrentUser().then((userData) => {
+            setUser({
+            name: userData.name,
+            email: userData.email,
+            role: userData.role,
+            });
+        });
       } catch (err) {
         console.error('Błąd dekodowania tokena:', err, token);
         setUser(null);
