@@ -10,7 +10,12 @@ import {
 
 import data from "./data.json"
 
+import { useAuth } from '~/auth/useAuth';
+
+
 export default function Page() {
+  const { user } = useAuth();
+  
   return (
     <SidebarProvider
       style={

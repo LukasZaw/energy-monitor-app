@@ -55,11 +55,13 @@ import { useIsMobile } from "~/hooks/use-mobile"
 import { Badge } from "~/components/ui/badge"
 import { Button } from "~/components/ui/button"
 import {
-  ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "~/components/ui/chart"
+
+import type { ChartConfig } from "~/components/ui/chart"
+
 import { Checkbox } from "~/components/ui/checkbox"
 import {
   Drawer,

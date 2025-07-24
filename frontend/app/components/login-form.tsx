@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate, Link } from 'react-router-dom';
 import { cn } from "~/lib/utils"
 import { Button } from "~/components/ui/button"
 import {
@@ -12,29 +12,26 @@ import {
 import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
 
+import axios from "~/lib/axios";
+import { useAuth } from '~/auth/useAuth';
+
+
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null); // Dodano stan dla błędów
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     try {
-          const response = await fetch("/api/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        });
-      if (response.ok) {
-        const token = await response.text();
-        localStorage.setItem("token", token); // Zapisz token JWT
-        navigate("/dashboard"); // Przekierowanie na stronę główną
-      } else {
-        console.error("Login failed", response);
-        alert("Invalid email or password");
-      }
-    } catch (error) {
-      console.error("Login error:", error);
+      const response = await axios.post('/auth/login', { email, password });
+      login(response.data); // response.data to JWT
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError('Nieprawidłowy email lub hasło');
     }
   };
 
@@ -50,6 +47,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
         <CardContent>
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
+              {error && <p className="text-red-500">{error}</p>} {/* Wyświetlanie błędu */}
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
                 <Input

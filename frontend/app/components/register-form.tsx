@@ -11,32 +11,27 @@ import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
+import axios from "~/lib/axios";
+import { useAuth } from '~/auth/useAuth';
 export function RegisterForm({ className, ...props }: React.ComponentProps<"div">) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password }),
-      });
-
-      if (response.ok) {
+      const response = await axios.post("/auth/register", { username, email, password });
         alert("Registration successful! You can now log in.");
-        navigate("/login"); // Przekierowanie na stronę logowania
-      } else {
-        const error = await response.text();
-        alert(error);
-      }
-    } catch (error) {
+        navigate("/login");
+
+    } catch (error: any) {
       console.error("Registration error:", error);
+      setError(error.response?.data?.message || "An unexpected error occurred.");
     }
   };
 

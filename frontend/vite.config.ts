@@ -11,6 +11,7 @@ export default defineConfig({
         target: "http://localhost:8080", // Adres backendu
         changeOrigin: true,
         secure: false,
+        historyApiFallback: true,
       },
     },
   },

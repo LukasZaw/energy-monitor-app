@@ -13,7 +13,6 @@ import {
   CardTitle,
 } from "~/components/ui/card"
 import {
-  ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
@@ -29,6 +28,9 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "~/components/ui/toggle-group"
+
+import type { ChartConfig } from "~/components/ui/chart"
+
 
 export const description = "An interactive area chart"
 
