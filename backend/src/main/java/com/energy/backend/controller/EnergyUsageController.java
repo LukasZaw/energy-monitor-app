@@ -1,5 +1,6 @@
 package com.energy.backend.controller;
 
+import com.energy.backend.model.Device;
 import com.energy.backend.model.EnergyUsage;
 import com.energy.backend.model.User;
 import com.energy.backend.service.EnergyUsageService;
@@ -102,4 +103,25 @@ public class EnergyUsageController {
     }
 
 
+    @GetMapping("/user/me/history")
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
+    public ResponseEntity<?> getEnergyUsageHistoryForCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User loggedInUser = userService.findByEmail(email);
+
+        if (loggedInUser == null) {
+            return ResponseEntity.status(403).body("User not found");
+        }
+
+        List<Device> devices = deviceService.findDevicesByUserId(loggedInUser.getId());
+        if (devices.isEmpty()) {
+            return ResponseEntity.ok("No devices found for the user");
+        }
+
+        List<EnergyUsage> energyUsageHistory = devices.stream()
+            .flatMap(device -> energyUsageService.findByDeviceId(device.getId()).stream())
+            .toList();
+
+        return ResponseEntity.ok(energyUsageHistory);
+    }
 }

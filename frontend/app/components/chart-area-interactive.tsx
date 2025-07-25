@@ -28,6 +28,7 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "~/components/ui/toggle-group"
+import axiosInstance from "~/lib/axios"
 
 import type { ChartConfig } from "~/components/ui/chart"
 
@@ -142,39 +143,72 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
+async function fetchEnergyUsageHistory() {
+  try {
+    const response = await axiosInstance.get("/energy-usage/user/me/history");
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch energy usage history:", error);
+    return [];
+  }
+}
+
 export function ChartAreaInteractive() {
-  const isMobile = useIsMobile()
-  const [timeRange, setTimeRange] = React.useState("90d")
+  const isMobile = useIsMobile();
+  const [timeRange, setTimeRange] = React.useState("90d");
+  const [chartData, setChartData] = React.useState([]);
 
   React.useEffect(() => {
     if (isMobile) {
-      setTimeRange("7d")
+      setTimeRange("7d");
     }
-  }, [isMobile])
+  }, [isMobile]);
+
+  React.useEffect(() => {
+    async function loadData() {
+      const data = await fetchEnergyUsageHistory();
+
+      const groupedData = data.reduce((acc: Record<string, number>, entry: any) => {
+        acc[entry.date] = (acc[entry.date] || 0) + entry.energyKwh;
+        return acc;
+      }, {});
+
+      const formattedData = Object.keys(groupedData)
+        .map((date) => ({
+          date,
+          energy: groupedData[date],
+        }))
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+      setChartData(formattedData);
+    }
+
+    loadData();
+  }, []);
 
   const filteredData = chartData.filter((item) => {
-    const date = new Date(item.date)
-    const referenceDate = new Date("2024-06-30")
-    let daysToSubtract = 90
+    const date = new Date(item.date);
+    const referenceDate = new Date();
+    let daysToSubtract = 90;
     if (timeRange === "30d") {
-      daysToSubtract = 30
+      daysToSubtract = 30;
     } else if (timeRange === "7d") {
-      daysToSubtract = 7
+      daysToSubtract = 7;
     }
-    const startDate = new Date(referenceDate)
-    startDate.setDate(startDate.getDate() - daysToSubtract)
-    return date >= startDate
-  })
+    const startDate = new Date(referenceDate);
+    startDate.setDate(startDate.getDate() - daysToSubtract);
+    return date >= startDate;
+  });
 
   return (
     <Card className="@container/card">
       <CardHeader>
-        <CardTitle>Total Visitors</CardTitle>
+        <CardTitle>Energy Usage Over Time</CardTitle>
         <CardDescription>
           <span className="hidden @[540px]/card:block">
-            Total for the last 3 months
+            Total for the selected time range
           </span>
-          <span className="@[540px]/card:hidden">Last 3 months</span>
+          <span className="@[540px]/card:hidden">Selected time range</span>
         </CardDescription>
         <CardAction>
           <ToggleGroup
@@ -212,32 +246,25 @@ export function ChartAreaInteractive() {
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
         <ChartContainer
-          config={chartConfig}
+          config={{
+            energy: {
+              label: "Energy Usage (kWh)",
+              color: "var(--primary)",
+            },
+          }}
           className="aspect-auto h-[250px] w-full"
         >
           <AreaChart data={filteredData}>
             <defs>
-              <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="fillEnergy" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="var(--color-desktop)"
-                  stopOpacity={1.0}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-desktop)"
-                  stopOpacity={0.1}
-                />
-              </linearGradient>
-              <linearGradient id="fillMobile" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-mobile)"
+                  stopColor="var(--primary)"
                   stopOpacity={0.8}
                 />
                 <stop
                   offset="95%"
-                  stopColor="var(--color-mobile)"
+                  stopColor="var(--primary)"
                   stopOpacity={0.1}
                 />
               </linearGradient>
@@ -250,11 +277,11 @@ export function ChartAreaInteractive() {
               tickMargin={8}
               minTickGap={32}
               tickFormatter={(value) => {
-                const date = new Date(value)
+                const date = new Date(value);
                 return date.toLocaleDateString("en-US", {
                   month: "short",
                   day: "numeric",
-                })
+                });
               }}
             />
             <ChartTooltip
@@ -266,29 +293,22 @@ export function ChartAreaInteractive() {
                     return new Date(value).toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
-                    })
+                    });
                   }}
                   indicator="dot"
                 />
               }
             />
             <Area
-              dataKey="mobile"
+              dataKey="energy"
               type="natural"
-              fill="url(#fillMobile)"
-              stroke="var(--color-mobile)"
-              stackId="a"
-            />
-            <Area
-              dataKey="desktop"
-              type="natural"
-              fill="url(#fillDesktop)"
-              stroke="var(--color-desktop)"
+              fill="url(#fillEnergy)"
+              stroke="var(--primary)"
               stackId="a"
             />
           </AreaChart>
         </ChartContainer>
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -16,7 +16,6 @@ import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { Badge } from "~/components/ui/badge";
-import { toast } from "sonner"; // Import Sonner toast
 
 import {
   Sheet,
@@ -28,11 +27,12 @@ import {
 } from "~/components/ui/sheet";
 import { IconEdit, IconTrash } from "@tabler/icons-react";
 
+
+
 export default function DevicesPage() {
   const [devices, setDevices] = useState([]);
   const [newDevice, setNewDevice] = useState({ name: "", type: "", powerWatt: 0, dailyUsageHours: 0 });
-  const [editingDevice, setEditingDevice] = useState(null); // State for the device being edited
-
+  const [editingDevice, setEditingDevice] = useState(null);
   useEffect(() => {
     async function fetchDevices() {
       try {
@@ -51,10 +51,8 @@ export default function DevicesPage() {
       const response = await axiosInstance.post("/devices", newDevice);
       setDevices((prev) => [...prev, response.data]);
       setNewDevice({ name: "", type: "", powerWatt: 0, dailyUsageHours: 0 });
-      toast.success("Device added successfully!");
     } catch (error) {
       console.error("Error adding device:", error);
-      toast.error("Failed to add device.");
     }
   }
 
@@ -66,10 +64,8 @@ export default function DevicesPage() {
         prev.map((device) => (device.id === editingDevice.id ? response.data : device))
       );
       setEditingDevice(null);
-      toast.success("Device updated successfully!");
     } catch (error) {
       console.error("Error updating device:", error);
-      toast.error("Failed to update device.");
     }
   }
 
@@ -77,13 +73,10 @@ export default function DevicesPage() {
     try {
       await axiosInstance.delete(`/devices/${deviceId}`);
       setDevices((prev) => prev.filter((device) => device.id !== deviceId));
-      toast.success("Device deleted successfully!");
     } catch (error) {
       console.error("Error deleting device:", error);
-      toast.error("Failed to delete device.");
     }
   }
-  //TODO: Nie wyswietla sie popup o usunieciu, trzeba to poprawic
   return (
     <SidebarProvider
       style={{
