@@ -16,7 +16,6 @@ import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { Badge } from "~/components/ui/badge";
-
 import {
   Sheet,
   SheetContent,
@@ -25,14 +24,16 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "~/components/ui/sheet";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { IconEdit, IconTrash } from "@tabler/icons-react";
 
 
 
 export default function DevicesPage() {
   const [devices, setDevices] = useState([]);
-  const [newDevice, setNewDevice] = useState({ name: "", type: "", powerWatt: 0, dailyUsageHours: 0 });
+  const [newDevice, setNewDevice] = useState({ name: "", type: "AGD", powerWatt: 0, dailyUsageHours: 0 });
   const [editingDevice, setEditingDevice] = useState(null);
+
   useEffect(() => {
     async function fetchDevices() {
       try {
@@ -50,7 +51,7 @@ export default function DevicesPage() {
     try {
       const response = await axiosInstance.post("/devices", newDevice);
       setDevices((prev) => [...prev, response.data]);
-      setNewDevice({ name: "", type: "", powerWatt: 0, dailyUsageHours: 0 });
+      setNewDevice({ name: "", type: "AGD", powerWatt: 0, dailyUsageHours: 0 });
     } catch (error) {
       console.error("Error adding device:", error);
     }
@@ -77,6 +78,7 @@ export default function DevicesPage() {
       console.error("Error deleting device:", error);
     }
   }
+
   return (
     <SidebarProvider
       style={{
@@ -102,57 +104,65 @@ export default function DevicesPage() {
               <SheetHeader>
                 <SheetTitle>Adding new device</SheetTitle>
                 <SheetDescription>
-                  <form onSubmit={handleAddDevice} className="flex flex-col gap-4">
-                    <div className="flex flex-col gap-3">
-                      <Label htmlFor="device-name">Device Name</Label>
-                      <Input
-                        id="device-name"
-                        type="text"
-                        placeholder="Device Name"
-                        value={newDevice.name}
-                        onChange={(e) => setNewDevice({ ...newDevice, name: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div className="flex flex-col gap-3">
-                      <Label htmlFor="device-type">Device Type</Label>
-                      <Input
-                        id="device-type"
-                        type="text"
-                        placeholder="Device Type"
-                        value={newDevice.type}
-                        onChange={(e) => setNewDevice({ ...newDevice, type: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div className="flex flex-col gap-3">
-                      <Label htmlFor="device-power">Power (W)</Label>
-                      <Input
-                        id="device-power"
-                        type="number"
-                        placeholder="Power (W)"
-                        value={newDevice.powerWatt}
-                        onChange={(e) => setNewDevice({ ...newDevice, powerWatt: Number(e.target.value) })}
-                        required
-                      />
-                    </div>
-                    <div className="flex flex-col gap-3">
-                      <Label htmlFor="device-usage">Daily Usage Hours</Label>
-                      <Input
-                        id="device-usage"
-                        type="number"
-                        placeholder="Daily Usage Hours"
-                        value={newDevice.dailyUsageHours}
-                        onChange={(e) => setNewDevice({ ...newDevice, dailyUsageHours: Number(e.target.value) })}
-                        required
-                      />
-                    </div>
-                    <Button type="submit" className="btn btn-primary">
-                      Add Device
-                    </Button>
-                  </form>
+                  Fill out the form below to add a new device.
                 </SheetDescription>
               </SheetHeader>
+              <form onSubmit={handleAddDevice} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-3">
+                  <Label htmlFor="device-name">Device Name</Label>
+                  <Input
+                    id="device-name"
+                    type="text"
+                    placeholder="Device Name"
+                    value={newDevice.name}
+                    onChange={(e) => setNewDevice({ ...newDevice, name: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="flex flex-col gap-3">
+                  <Label htmlFor="device-type">Device Type</Label>
+                  <Select
+                    value={newDevice.type}
+                    onValueChange={(value) => setNewDevice({ ...newDevice, type: value })}
+                  >
+                    <SelectTrigger id="device-type">
+                      <SelectValue placeholder="Select a type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="AGD">AGD</SelectItem>
+                      <SelectItem value="RTV">RTV</SelectItem>
+                      <SelectItem value="Oświetlenie">Oświetlenie</SelectItem>
+                      <SelectItem value="HVAC">HVAC</SelectItem>
+                      <SelectItem value="inne">inne</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <Label htmlFor="device-power">Power (W)</Label>
+                  <Input
+                    id="device-power"
+                    type="number"
+                    placeholder="Power (W)"
+                    value={newDevice.powerWatt}
+                    onChange={(e) => setNewDevice({ ...newDevice, powerWatt: Number(e.target.value) })}
+                    required
+                  />
+                </div>
+                <div className="flex flex-col gap-3">
+                  <Label htmlFor="device-usage">Daily Usage Hours</Label>
+                  <Input
+                    id="device-usage"
+                    type="number"
+                    placeholder="Daily Usage Hours"
+                    value={newDevice.dailyUsageHours}
+                    onChange={(e) => setNewDevice({ ...newDevice, dailyUsageHours: Number(e.target.value) })}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="btn btn-primary">
+                  Add Device
+                </Button>
+              </form>
             </SheetContent>
           </Sheet>
 
