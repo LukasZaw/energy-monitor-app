@@ -2,21 +2,28 @@ package com.energy.backend.controller;
 
 import com.energy.backend.model.User;
 import com.energy.backend.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
     private final UserRepository userRepository;
+    private final JdbcTemplate jdbcTemplate;
 
-    public UserController(UserRepository userRepository) {
+    @Autowired
+    public UserController(UserRepository userRepository, JdbcTemplate jdbcTemplate) {
         this.userRepository = userRepository;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     // Pobierz wszystkich użytkowników (np. dla admina)
@@ -32,7 +39,7 @@ public class UserController {
     public ResponseEntity<?> getUserProfile(@PathVariable Long id) {
         Optional<User> user = userRepository.findById(id);
         return user.map(ResponseEntity::ok)
-                   .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     // Pobierz profil użytkownika po emailu
@@ -54,7 +61,7 @@ public class UserController {
     }
 
     @PutMapping("/set-energy-cost")
-    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')") 
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<?> setEnergyCost(@RequestParam double energyCostPerKwh) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email);
@@ -92,5 +99,18 @@ public class UserController {
         userRepository.save(user);
 
         return ResponseEntity.ok("User updated successfully");
+    }
+
+    @GetMapping("/summary")
+    public Map<String, Object> getStatsSummary() {
+        Map<String, Object> stats = new HashMap<>();
+        long totalUsers = userRepository.count();
+        stats.put("totalUsers", totalUsers);
+
+        stats.put("devicesConnected", 60);
+
+        stats.put("kwhTracked", 1000);
+
+        return stats;
     }
 }
