@@ -19,7 +19,7 @@ import { useAuth } from '~/auth/useAuth';
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null); // Dodano stan dla błędów
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -47,7 +47,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
         <CardContent>
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
-              {error && <p className="text-red-500">{error}</p>} {/* Wyświetlanie błędu */}
+              {error && <p className="text-red-500">{error}</p>}
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
                 <Input

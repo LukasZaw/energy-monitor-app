@@ -7,7 +7,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "~/components/ui/sidebar"
-import { useNavigate } from "react-router-dom" // Import nawigacji
+import { useNavigate } from "react-router-dom" 
 
 export function NavMain({
   items,
@@ -18,7 +18,7 @@ export function NavMain({
     icon?: Icon
   }[]
 }) {
-  const navigate = useNavigate(); // Inicjalizacja nawigacji
+  const navigate = useNavigate();
 
   return (
     <SidebarGroup>

@@ -77,4 +77,20 @@ public class UserController {
         }
         return ResponseEntity.ok(user);
     }
+
+    @PutMapping("/me")
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
+    public ResponseEntity<?> updateUser(@RequestBody User updatedUser) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            return ResponseEntity.status(403).body("User not found");
+        }
+
+        user.setUsername(updatedUser.getUsername());
+        user.setEmail(updatedUser.getEmail());
+        userRepository.save(user);
+
+        return ResponseEntity.ok("User updated successfully");
+    }
 }

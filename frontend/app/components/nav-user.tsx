@@ -27,8 +27,8 @@ import {
   useSidebar,
 } from "~/components/ui/sidebar"
 
-import { useAuth } from "~/auth/useAuth"; // Importuj kontekst AuthContext
-import { useNavigate } from "react-router-dom"; // Importuj nawigację
+import { useAuth } from "~/auth/useAuth";
+import { useNavigate } from "react-router-dom";
 
 
 export function NavUser({

@@ -106,7 +106,6 @@ import {
 } from "~/components/ui/tabs"
 import axiosInstance from "../lib/axios"
 
-// Update the schema to match the database field names
 export const schema = z.object({
   id: z.number(),
   name: z.string(),
@@ -115,7 +114,6 @@ export const schema = z.object({
   dailyUsageHours: z.number(),
 })
 
-// Create a separate component for the drag handle
 function DragHandle({ id }: { id: number }) {
   const { attributes, listeners } = useSortable({
     id,
@@ -193,7 +191,6 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
   },
 ]
 
-// Update the DataTable component to accept and display device data
 export function DataTable({
   data: initialData,
 }: {
