@@ -61,11 +61,6 @@ const data = {
       url: "#",
       icon: IconFolder,
     },
-    {
-      title: "?",
-      url: "#",
-      icon: IconUsers,
-    },
   ],
   navClouds: [
     {
@@ -134,13 +129,13 @@ const data = {
   ],
   documents: [
     {
-      name: "Data Library",
-      url: "#",
+      name: "CVS Export",
+      url: "/csv-export",
       icon: IconDatabase,
     },
     {
-      name: "Reports",
-      url: "#",
+      name: "PDF Export",
+      url: "/pdf-export",
       icon: IconReport,
     },
   ],

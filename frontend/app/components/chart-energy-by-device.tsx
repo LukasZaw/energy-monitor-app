@@ -1,7 +1,7 @@
 "use client"
 
-import { TrendingUp } from "lucide-react"
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
+import { useEffect, useState } from "react"
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 
 import {
   Card,
@@ -11,132 +11,134 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card"
-import type { ChartConfig } from "~/components/ui/chart"
+
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "~/components/ui/chart"
+import axiosInstance from "~/lib/axios"
 
-export const description = "An area chart with gradient fill"
+export function ChartEnergyByDevice() {
+  const [chartData, setChartData] = useState([])
+  const [deviceKeys, setDeviceKeys] = useState<string[]>([])
 
-const chartData = [
-  { month: "January", desktop: 186, mobile: 80, tablet: 50 },
-  { month: "February", desktop: 305, mobile: 200, tablet: 100 },
-  { month: "March", desktop: 237, mobile: 120, tablet: 80 },
-  { month: "April", desktop: 73, mobile: 190, tablet: 60 },
-  { month: "May", desktop: 209, mobile: 130, tablet: 90 },
-  { month: "June", desktop: 214, mobile: 140, tablet: 70 },
-]
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await axiosInstance.get(
+          "/energy-usage/user/me/device-share"
+        )
+        const data = response.data
 
-const chartConfig = {
-  desktop: {
-    label: "Desktop",
-    color: "var(--chart-1)",
-  },
-  mobile: {
-    label: "Mobile",
-    color: "var(--chart-2)",
-  },
-    tablet: {
-        label: "Tablet",
-        color: "var(--chart-3)",
-    },
-} satisfies ChartConfig
+        // Transform data into a format suitable for the chart
+        const formattedData = data.map((entry: any) => {
+          const { date, devices } = entry
+          return {
+            date,
+            ...devices,
+          }
+        })
 
-export function ChartAreaGradient() {
+        // Extract unique device keys for the chart
+        const keys = Array.from(
+          new Set(data.flatMap((entry: any) => Object.keys(entry.devices)))
+        )
+
+        setChartData(formattedData)
+        setDeviceKeys(keys)
+      } catch (error) {
+        console.error("Failed to fetch energy usage data:", error)
+      }
+    }
+
+    fetchData()
+  }, [])
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Area Chart - Gradient</CardTitle>
+        <CardTitle>Energy Usage by Device</CardTitle>
         <CardDescription>
-          Showing total visitors for the last 6 months
+          Showing energy usage (kWh) for each device over time
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig}>
+        <ChartContainer config={{}}>
           <AreaChart
-            accessibilityLayer
             data={chartData}
             margin={{
               left: 12,
               right: 12,
             }}
           >
+            <defs>
+              {deviceKeys.map((key, index) => (
+                <linearGradient
+                  key={key}
+                  id={`fill${key}`}
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop
+                    offset="5%"
+                    stopColor={`var(--chart-${index + 1})`}
+                    stopOpacity={0.8}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor={`var(--chart-${index + 1})`}
+                    stopOpacity={0.1}
+                  />
+                </linearGradient>
+              ))}
+            </defs>
             <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="month"
+              dataKey="date"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) => value.slice(0, 3)}
+              reversed={true}
+              tickFormatter={(value) => {
+                const date = new Date(value)
+                return date.toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                })
+              }}
+            />
+            <YAxis
+              tickLine={false}
+              axisLine={true}
+              tickMargin={8}
+              label={{
+                value: "Energy (kWh)",
+                angle: -90,
+                position: "insideLeft",
+                style: { textAnchor: "middle", fill: "var(--foreground)" },
+              }}
             />
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-            <defs>
-              <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-desktop)"
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-desktop)"
-                  stopOpacity={0.1}
-                />
-
-              </linearGradient>
-              <linearGradient id="fillMobile" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-mobile)"
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-mobile)"
-                  stopOpacity={0.1}
-                />
-
-              </linearGradient>
-            </defs>
-            <Area
-              dataKey="mobile"
-              type="natural"
-              fill="url(#fillMobile)"
-              fillOpacity={0.4}
-              stroke="var(--color-mobile)"
-              stackId="a"
-            />
-            <Area
-              dataKey="desktop"
-              type="natural"
-              fill="url(#fillDesktop)"
-              fillOpacity={0.4}
-              stroke="var(--color-desktop)"
-              stackId="a"
-            />
-            <Area
-              dataKey="tablet"
-              type="natural"
-              fill="var(--color-tablet)"
-              fillOpacity={0.4}
-              stroke="var(--color-tablet)"
-              stackId="a"
-            />
+            {deviceKeys.map((key, index) => (
+              <Area
+                key={key}
+                dataKey={key}
+                type="natural"
+                fill={`url(#fill${key})`}
+                fillOpacity={0.4}
+                stroke={`var(--chart-${index + 1})`}
+                stackId="a"
+              />
+            ))}
           </AreaChart>
         </ChartContainer>
       </CardContent>
       <CardFooter>
-        <div className="flex w-full items-start gap-2 text-sm">
-          <div className="grid gap-2">
-            <div className="flex items-center gap-2 leading-none font-medium">
-              Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-            </div>
-            <div className="text-muted-foreground flex items-center gap-2 leading-none">
-              January - June 2024
-            </div>
-          </div>
+        <div className="text-muted-foreground text-sm">
+          Data is aggregated by device and date.
         </div>
       </CardFooter>
     </Card>

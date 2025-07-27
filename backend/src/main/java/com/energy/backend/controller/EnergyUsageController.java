@@ -12,7 +12,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/energy-usage")
@@ -123,5 +126,140 @@ public class EnergyUsageController {
             .toList();
 
         return ResponseEntity.ok(energyUsageHistory);
+    }
+
+
+    @GetMapping("/user/me/device-share")
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
+    public ResponseEntity<?> getDeviceEnergyShareForCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User loggedInUser = userService.findByEmail(email);
+
+        if (loggedInUser == null) {
+            return ResponseEntity.status(403).body("User not found");
+        }
+
+        List<Device> devices = deviceService.findDevicesByUserId(loggedInUser.getId());
+        if (devices.isEmpty()) {
+            return ResponseEntity.ok("No devices found for the user");
+        }
+
+        // Pobierz dane zużycia energii dla każdego urządzenia użytkownika
+        List<EnergyUsage> energyUsageHistory = devices.stream()
+            .flatMap(device -> energyUsageService.findByDeviceId(device.getId()).stream())
+            .toList();
+
+        // Grupowanie danych według daty i urządzenia
+        Map<LocalDate, Map<String, Double>> groupedData = energyUsageHistory.stream()
+            .collect(Collectors.groupingBy(
+                EnergyUsage::getDate, // Grupowanie po dacie
+                Collectors.groupingBy(
+                    usage -> usage.getDevice().getName(), // Grupowanie po nazwie urządzenia
+                    Collectors.summingDouble(EnergyUsage::getEnergyKwh) // Sumowanie zużycia energii
+                )
+            ));
+
+        // Przekształcenie danych do formatu JSON
+        List<Map<String, Object>> responseData = groupedData.entrySet().stream()
+            .map(entry -> {
+                LocalDate date = entry.getKey();
+                Map<String, Double> deviceData = entry.getValue();
+
+                // Zwróć dane w formacie JSON
+                Map<String, Object> dayData = new HashMap<>();
+                dayData.put("date", date);
+                dayData.put("devices", deviceData); // Zwracamy surowe wartości kWh
+                return dayData;
+            })
+            .toList();
+
+        return ResponseEntity.ok(responseData);
+    }
+
+    @GetMapping("/user/me/type-summary")
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
+    public ResponseEntity<?> getEnergyUsageSummaryByDeviceType() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User loggedInUser = userService.findByEmail(email);
+
+        if (loggedInUser == null) {
+            return ResponseEntity.status(403).body("User not found");
+        }
+
+        List<Device> devices = deviceService.findDevicesByUserId(loggedInUser.getId());
+        if (devices.isEmpty()) {
+            return ResponseEntity.ok("No devices found for the user");
+        }
+
+        // Pobierz dane zużycia energii dla każdego urządzenia użytkownika
+        List<EnergyUsage> energyUsageHistory = devices.stream()
+            .flatMap(device -> energyUsageService.findByDeviceId(device.getId()).stream())
+            .toList();
+
+        // Grupowanie danych według typu urządzenia i sumowanie zużycia energii
+        Map<String, Double> energyUsageByType = energyUsageHistory.stream()
+            .collect(Collectors.groupingBy(
+                usage -> usage.getDevice().getType(), // Grupowanie po typie urządzenia
+                Collectors.summingDouble(EnergyUsage::getEnergyKwh) // Sumowanie zużycia energii
+            ));
+
+        // Przekształcenie danych do formatu JSON
+        List<Map<String, Object>> responseData = energyUsageByType.entrySet().stream()
+            .map(entry -> {
+                Map<String, Object> typeData = new HashMap<>();
+                typeData.put("type", entry.getKey());
+                typeData.put("totalEnergyKwh", entry.getValue());
+                return typeData;
+            })
+            .toList();
+
+        return ResponseEntity.ok(responseData);
+    }
+
+
+    @GetMapping("/user/me/type/{type}/devices")
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
+    public ResponseEntity<?> getEnergyUsageByDeviceType(@PathVariable String type) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User loggedInUser = userService.findByEmail(email);
+
+        if (loggedInUser == null) {
+            return ResponseEntity.status(403).body("User not found");
+        }
+
+        List<Device> devices = deviceService.findDevicesByUserId(loggedInUser.getId());
+        if (devices.isEmpty()) {
+            return ResponseEntity.ok("No devices found for the user");
+        }
+
+        // Filtruj urządzenia według typu
+        List<Device> filteredDevices = devices.stream()
+            .filter(device -> type.equalsIgnoreCase(device.getType()))
+            .toList();
+
+        if (filteredDevices.isEmpty()) {
+            return ResponseEntity.ok("No devices of the specified type found for the user");
+        }
+
+        // Pobierz dane zużycia energii dla urządzeń danego typu
+        Map<String, Double> energyUsageByDevice = filteredDevices.stream()
+            .collect(Collectors.toMap(
+                Device::getName, // Grupowanie po nazwie urządzenia
+                device -> energyUsageService.findByDeviceId(device.getId()).stream()
+                    .mapToDouble(EnergyUsage::getEnergyKwh) // Sumowanie zużycia energii
+                    .sum()
+            ));
+
+        // Przekształcenie danych do formatu JSON
+        List<Map<String, Object>> responseData = energyUsageByDevice.entrySet().stream()
+            .map(entry -> {
+                Map<String, Object> deviceData = new HashMap<>();
+                deviceData.put("device", entry.getKey());
+                deviceData.put("totalEnergyKwh", entry.getValue());
+                return deviceData;
+            })
+            .toList();
+
+        return ResponseEntity.ok(responseData);
     }
 }
