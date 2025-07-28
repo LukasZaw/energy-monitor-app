@@ -129,13 +129,13 @@ const data = {
   ],
   documents: [
     {
-      name: "CVS Export",
-      url: "/csv-export",
+      name: "Devices Report",
+      url: "/devices-report",
       icon: IconDatabase,
     },
     {
-      name: "PDF Export",
-      url: "/pdf-export",
+      name: "Summary Report",
+      url: "/summary-report",
       icon: IconReport,
     },
   ],

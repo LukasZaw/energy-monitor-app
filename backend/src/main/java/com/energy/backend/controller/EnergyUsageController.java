@@ -232,7 +232,6 @@ public class EnergyUsageController {
             return ResponseEntity.ok("No devices found for the user");
         }
 
-        // Filtruj urządzenia według typu
         List<Device> filteredDevices = devices.stream()
             .filter(device -> type.equalsIgnoreCase(device.getType()))
             .toList();
@@ -241,16 +240,14 @@ public class EnergyUsageController {
             return ResponseEntity.ok("No devices of the specified type found for the user");
         }
 
-        // Pobierz dane zużycia energii dla urządzeń danego typu
         Map<String, Double> energyUsageByDevice = filteredDevices.stream()
             .collect(Collectors.toMap(
-                Device::getName, // Grupowanie po nazwie urządzenia
+                Device::getName, 
                 device -> energyUsageService.findByDeviceId(device.getId()).stream()
-                    .mapToDouble(EnergyUsage::getEnergyKwh) // Sumowanie zużycia energii
+                    .mapToDouble(EnergyUsage::getEnergyKwh) 
                     .sum()
             ));
 
-        // Przekształcenie danych do formatu JSON
         List<Map<String, Object>> responseData = energyUsageByDevice.entrySet().stream()
             .map(entry -> {
                 Map<String, Object> deviceData = new HashMap<>();
@@ -261,5 +258,15 @@ public class EnergyUsageController {
             .toList();
 
         return ResponseEntity.ok(responseData);
+    }
+
+    @GetMapping("/summary")
+    public ResponseEntity<Map<String, Object>> getTotalKwhTracked() {
+        double totalKwhTracked = energyUsageService.getTotalEnergyUsage();
+
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("kwhTracked", totalKwhTracked);
+
+        return ResponseEntity.ok(summary);
     }
 }

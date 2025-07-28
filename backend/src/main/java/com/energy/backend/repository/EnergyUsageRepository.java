@@ -17,4 +17,7 @@ public interface EnergyUsageRepository extends JpaRepository<EnergyUsage, Long> 
     @Modifying
     @Query("DELETE FROM EnergyUsage e WHERE e.device.id = :deviceId")
     void deleteByDeviceId(@Param("deviceId") Long deviceId);
+
+    @Query("SELECT COALESCE(SUM(e.energyKwh), 0) FROM EnergyUsage e")
+    double sumAllEnergyUsage();
 }

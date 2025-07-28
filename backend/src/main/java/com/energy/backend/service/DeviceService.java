@@ -42,5 +42,9 @@ public class DeviceService {
     public Device findById(Long deviceId) {
         return deviceRepository.findById(deviceId).orElse(null);
     }
+
+    public long countAllDevices() {
+        return deviceRepository.count();
+    }
     
 }

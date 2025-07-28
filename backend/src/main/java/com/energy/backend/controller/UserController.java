@@ -107,10 +107,6 @@ public class UserController {
         long totalUsers = userRepository.count();
         stats.put("totalUsers", totalUsers);
 
-        stats.put("devicesConnected", 60);
-
-        stats.put("kwhTracked", 1000);
-
         return stats;
     }
 }

@@ -7,6 +7,7 @@ export default [
   route("/devices", "routes/devices.tsx"),
   route("/profile", "routes/profile.tsx"),
   route("/analytics", "routes/analytics.tsx"),
-  route("/csv-export", "routes/csv-export.tsx"),
+  route("/devices-report", "routes/devices-report.tsx"),
+  route("/summary-report", "routes/summary-report.tsx"),
   route("/", "routes/landing.tsx"),
 ] satisfies RouteConfig;

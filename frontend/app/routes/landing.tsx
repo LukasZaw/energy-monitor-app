@@ -7,7 +7,7 @@ import {
   CardDescription,
 } from "~/components/ui/card";
 import { useEffect, useRef, useState } from "react";
-import axiosInstance from "~/lib/axios"; // Upewnij się, że ten import istnieje
+import axiosInstance from "~/lib/axios";
 
 export default function LandingPage() {
   return (
@@ -58,7 +58,6 @@ export default function LandingPage() {
             </Button>
           </CardContent>
         </Card>
-        {/* Cool animated stats section */}
         <section className="mt-12 w-full max-w-2xl flex flex-col items-center">
           <h2 className="text-2xl font-semibold mb-4 text-primary">
             Live Energy Stats
@@ -88,13 +87,13 @@ function StatCard({
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     // Animate numbers if value is numeric
-    const num = parseInt(value.replace(/[^\d]/g, ""));
+    const num = parseInt(value.replace(/[^\d]/g, "."));
     if (isNaN(num)) {
       setDisplayValue(value);
       return;
     }
     let start = 0;
-    const duration = 1200;
+    const duration = 1500;
     const startTime = performance.now();
     function animate(now: number) {
       const elapsed = now - startTime;
@@ -122,52 +121,57 @@ function StatCard({
 }
 
 function LiveStats() {
-  const [stats, setStats] = useState<{
-    totalUsers: number;
-    devicesConnected: number;
-    kwhTracked: number;
-  } | null>(null);
-
-  useEffect(() => {
-    async function fetchStats() {
-      try {
-        const response = await axiosInstance.get("users/summary");
-        console.log("Fetched stats:", response.data);
-        setStats(response.data);
-      } catch (error) {
-        setStats(null);
-      }
-    }
-    fetchStats();
-  }, []);
-
-  if (!stats) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-        <StatCard label="Total Users" value="..." icon="👥" />
-        <StatCard label="Devices Connected" value="..." icon="🔌" />
-        <StatCard label="kWh Tracked" value="..." icon="⚡" />
-      </div>
-    );
-  }
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-      <StatCard
+      <StatCardWithEndpoint
         label="Total Users"
-        value={stats.totalUsers.toLocaleString()}
+        endpoint="/users/summary"
         icon="👥"
       />
-      <StatCard
+      <StatCardWithEndpoint
         label="Devices Connected"
-        value={stats.devicesConnected.toLocaleString()}
+        endpoint="/devices/summary"
         icon="🔌"
       />
-      <StatCard
+      <StatCardWithEndpoint
         label="kWh Tracked"
-        value={stats.kwhTracked.toLocaleString()}
+        endpoint="/energy-usage/summary"
         icon="⚡"
       />
     </div>
   );
+}
+
+function StatCardWithEndpoint({
+  label,
+  endpoint,
+  icon,
+}: {
+  label: string;
+  endpoint: string;
+  icon: string;
+}) {
+  const [value, setValue] = useState("...");
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await axiosInstance.get(endpoint);
+
+        if (endpoint === "/users/summary") {
+          setValue(response.data.totalUsers?.toLocaleString() || "0");
+        } else if (endpoint === "/devices/summary") {
+          setValue(response.data.devicesConnected?.toLocaleString() || "0");
+        } else if (endpoint === "/energy-usage/summary") {
+          setValue(response.data.kwhTracked?.toLocaleString() || "0");
+        }
+      } catch (error) {
+        console.error(`Failed to fetch data for ${label}:`, error);
+        setValue("...");
+      }
+    }
+    fetchData();
+  }, [endpoint, label]);
+
+  return <StatCard label={label} value={value} icon={icon} />;
 }

@@ -6,7 +6,7 @@ import { AppSidebar } from "~/components/app-sidebar";
 import { SiteHeader } from "~/components/site-header";
 import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
 
-export default function CsvExportPage() {
+export default function DevicesReportPage() {
   return (
     <SidebarProvider
       style={{
@@ -18,8 +18,9 @@ export default function CsvExportPage() {
       <SidebarInset>
         <SiteHeader />
         <div className="flex flex-1 flex-col p-4 md:p-6 lg:p-8">
-          <h1 className="text-2xl font-semibold mb-4">CSV Export</h1>
+          <h1 className="text-2xl font-semibold mb-4">Devices Report</h1>
           <DataTableExport />
+          
         </div>
       </SidebarInset>
     </SidebarProvider>

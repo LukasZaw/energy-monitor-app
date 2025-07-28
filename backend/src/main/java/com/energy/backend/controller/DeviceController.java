@@ -12,7 +12,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/devices")
@@ -137,5 +139,15 @@ public class DeviceController {
         }
         List<Device> devices = deviceService.findDevicesByUserId(user.getId());
         return ResponseEntity.ok(devices);
+    }
+
+    @GetMapping("/summary")
+    public ResponseEntity<Map<String, Object>> getDevicesSummary() {
+        long devicesConnected = deviceService.countAllDevices();
+
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("devicesConnected", devicesConnected);
+
+        return ResponseEntity.ok(summary);
     }
 }
