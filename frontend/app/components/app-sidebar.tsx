@@ -57,9 +57,10 @@ const data = {
       icon: IconChartBar,
     },
     {
-      title: "?Categories",
-      url: "#",
-      icon: IconFolder,
+      title: "Admin Panel",
+      url: "/admin-dashboard",
+      icon: IconSettings,
+      visibleForAdmin: true,
     },
   ],
   navClouds: [
@@ -123,7 +124,7 @@ const data = {
     },
     {
       title: "Search",
-      url: "#",
+      url: "/devices-report",
       icon: IconSearch,
     },
   ],

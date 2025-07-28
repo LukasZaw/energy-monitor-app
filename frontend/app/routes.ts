@@ -10,4 +10,5 @@ export default [
   route("/devices-report", "routes/devices-report.tsx"),
   route("/summary-report", "routes/summary-report.tsx"),
   route("/", "routes/landing.tsx"),
+  route("/admin-dashboard", "routes/admin-dashboard.tsx"),
 ] satisfies RouteConfig;
