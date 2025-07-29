@@ -121,4 +121,32 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping("/signup-stats")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<Map<String, Object>>> getSignupStats() {
+        String query = """
+            WITH RECURSIVE date_range AS (
+                SELECT CURDATE() - INTERVAL 14 DAY AS signup_date
+                UNION ALL
+                SELECT signup_date + INTERVAL 1 DAY
+                FROM date_range
+                WHERE signup_date + INTERVAL 1 DAY <= CURDATE()
+            )
+            SELECT d.signup_date, COUNT(u.id) AS signup_count
+            FROM date_range d
+            LEFT JOIN users u ON DATE(u.created_at) = d.signup_date
+            GROUP BY d.signup_date
+            ORDER BY d.signup_date ASC
+        """;
+
+        List<Map<String, Object>> stats = jdbcTemplate.query(query, (rs, rowNum) -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("date", rs.getDate("signup_date"));
+            map.put("count", rs.getInt("signup_count"));
+            return map;
+        });
+
+        return ResponseEntity.ok(stats);
+    }
 }

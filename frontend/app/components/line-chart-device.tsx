@@ -27,12 +27,12 @@ export const description = "A line chart"
 
 const chartConfig = {
   count: {
-    label: "Signups",
+    label: "Devices",
     color: "var(--chart-1)",
   },
 } satisfies ChartConfig
 
-export function LineChartUser() {
+export function LineChartDevice() {
   const [chartData, setChartData] = useState<{ date: string; count: number }[]>(
     []
   )
@@ -40,10 +40,9 @@ export function LineChartUser() {
   useEffect(() => {
     async function fetchSignupStats() {
       try {
-        const response = await axiosInstance.get("/users/signup-stats")
+        const response = await axiosInstance.get("devices/creation-stats")
         const data = response.data
 
-        // Formatowanie daty do skróconego formatu (np. "Jul 22")
         const formattedData = data.map(
           (entry: { date: string; count: number }) => ({
             date: new Date(entry.date).toLocaleDateString("en-US", {
@@ -56,7 +55,7 @@ export function LineChartUser() {
 
         setChartData(formattedData)
       } catch (error) {
-        console.error("Failed to fetch signup stats:", error)
+        console.error("Failed to fetch devices add stats:", error)
       }
     }
 
@@ -66,7 +65,7 @@ export function LineChartUser() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>New Users</CardTitle>
+        <CardTitle>New Devices added</CardTitle>
         <CardDescription>Last 14 days</CardDescription>
       </CardHeader>
       <CardContent>
@@ -115,7 +114,7 @@ export function LineChartUser() {
       <CardFooter className="flex-col items-start gap-2 text-sm">
         
         <div className="text-muted-foreground leading-none">
-          Showing total signups for the last 14 days
+          Showing total devices added in the last 14 days
         </div>
       </CardFooter>
     </Card>

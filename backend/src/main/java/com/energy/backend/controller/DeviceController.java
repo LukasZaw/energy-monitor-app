@@ -7,6 +7,7 @@ import com.energy.backend.service.DeviceService;
 import com.energy.backend.service.EnergyUsageService;
 import com.energy.backend.service.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -22,11 +23,13 @@ public class DeviceController {
     private final DeviceService deviceService;
     private final UserService userService;
     private final EnergyUsageService energyUsageService;
+    private final JdbcTemplate jdbcTemplate;
 
-    public DeviceController(DeviceService deviceService, UserService userService, EnergyUsageService energyUsageService) {
+    public DeviceController(DeviceService deviceService, UserService userService, EnergyUsageService energyUsageService, JdbcTemplate jdbcTemplate) {
         this.deviceService = deviceService;
         this.userService = userService;
         this.energyUsageService = energyUsageService;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     // Pobierz wszystkie urządzenia
@@ -149,5 +152,33 @@ public class DeviceController {
         summary.put("devicesConnected", devicesConnected);
 
         return ResponseEntity.ok(summary);
+    }
+
+    @GetMapping("/creation-stats")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<Map<String, Object>>> getDeviceCreationStats() {
+        String query = """
+            WITH RECURSIVE date_range AS (
+                SELECT CURDATE() - INTERVAL 14 DAY AS creation_date
+                UNION ALL
+                SELECT creation_date + INTERVAL 1 DAY
+                FROM date_range
+                WHERE creation_date + INTERVAL 1 DAY <= CURDATE()
+            )
+            SELECT d.creation_date, COUNT(dev.id) AS device_count
+            FROM date_range d
+            LEFT JOIN devices dev ON DATE(dev.created_at) = d.creation_date
+            GROUP BY d.creation_date
+            ORDER BY d.creation_date ASC
+        """;
+
+        List<Map<String, Object>> stats = jdbcTemplate.query(query, (rs, rowNum) -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("date", rs.getDate("creation_date"));
+            map.put("count", rs.getInt("device_count"));
+            return map;
+        });
+
+        return ResponseEntity.ok(stats);
     }
 }

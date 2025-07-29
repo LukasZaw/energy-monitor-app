@@ -6,6 +6,7 @@ import { SiteHeader } from "~/components/site-header"
 
 import { DataTableUsers } from "~/components/data-table-users"
 import { LineChartUser } from "~/components/line-chart-user"
+import { LineChartDevice } from "~/components/line-chart-device"
 
 import { Navigate } from "react-router-dom";
 import {
@@ -48,7 +49,7 @@ export default function AdminDashboard() {
               <LineChartUser />
             </div>
             <div className="flex-1 min-w-[400px] rounded-md shadow-md">
-              <LineChartUser />
+              <LineChartDevice />
             </div>
           </div>
           </div>
