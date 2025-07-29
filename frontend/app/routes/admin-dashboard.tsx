@@ -43,7 +43,6 @@ export default function AdminDashboard() {
 
           <DataTableUsers />
 
-          {/* Kontener dla wykresów */}
           <div className="flex flex-wrap gap-4 mt-6">
             <div className="flex-1 min-w-[400px] rounded-md shadow-md">
               <LineChartUser />

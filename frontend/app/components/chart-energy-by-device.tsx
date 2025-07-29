@@ -31,7 +31,6 @@ export function ChartEnergyByDevice() {
         )
         const data = response.data
 
-        // Transform data into a format suitable for the chart
         const formattedData = data.map((entry: any) => {
           const { date, devices } = entry
           return {
@@ -40,7 +39,6 @@ export function ChartEnergyByDevice() {
           }
         })
 
-        // Extract unique device keys for the chart
         const keys = Array.from(
           new Set(data.flatMap((entry: any) => Object.keys(entry.devices)))
         )

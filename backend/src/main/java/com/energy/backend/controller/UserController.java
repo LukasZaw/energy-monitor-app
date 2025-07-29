@@ -26,14 +26,14 @@ public class UserController {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // Pobierz wszystkich użytkowników (np. dla admina)
+    // Fetch all users (for admin)
     @GetMapping
     @PreAuthorize("hasAuthority('ADMIN')")
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    // Pobierz profil użytkownika po ID
+    // Fetch user profile by ID
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> getUserProfile(@PathVariable Long id) {
@@ -42,7 +42,7 @@ public class UserController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Pobierz profil użytkownika po emailu
+    // Fetch user profile by email
     @GetMapping("/email/{email}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> getUserByEmail(@PathVariable String email) {
@@ -53,13 +53,14 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    // Pobierz użytkowników po roli
+    // Fetch users by role
     @GetMapping("/role/{role}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public List<User> getUsersByRole(@PathVariable User.Role role) {
         return userRepository.findByRole(role);
     }
 
+    // Set energy cost per kWh for the current user
     @PutMapping("/set-energy-cost")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<?> setEnergyCost(@RequestParam double energyCostPerKwh) {
@@ -74,6 +75,7 @@ public class UserController {
         return ResponseEntity.ok("Energy cost updated successfully");
     }
 
+    // Get current user's profile
     @GetMapping("/me")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<?> getCurrentUser() {
@@ -85,6 +87,7 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    // Update current user's profile
     @PutMapping("/me")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<?> updateUser(@RequestBody User updatedUser) {
@@ -101,6 +104,7 @@ public class UserController {
         return ResponseEntity.ok("User updated successfully");
     }
 
+    // Get user statistics summary (for admin)
     @GetMapping("/summary")
     public Map<String, Object> getStatsSummary() {
         Map<String, Object> stats = new HashMap<>();
@@ -110,6 +114,7 @@ public class UserController {
         return stats;
     }
 
+    // Delete user by ID (for admin)
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
@@ -122,6 +127,7 @@ public class UserController {
         }
     }
 
+    // Get signup statistics for the last 14 days (for admin)
     @GetMapping("/signup-stats")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<Map<String, Object>>> getSignupStats() {

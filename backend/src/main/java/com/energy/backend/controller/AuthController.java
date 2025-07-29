@@ -26,7 +26,7 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    // Rejestracja użytkownika
+    // Register of a new user
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
@@ -41,7 +41,7 @@ public class AuthController {
         }
     }
 
-    // Logowanie użytkownika
+    // Login of an existing user
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
@@ -57,13 +57,12 @@ public class AuthController {
             
             return ResponseEntity.ok(jwt);
         } catch (Exception e) {
-            // System.out.println("User: " + user);
             System.err.println("Login error: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
         }
     }
 
-    // DTO do rejestracji
+    // DTO for registration
     public static class RegisterRequest {
     private String username;
     private String email;
@@ -77,7 +76,7 @@ public class AuthController {
     public void setPassword(String password) { this.password = password; }
 }
 
-    // DTO do logowania
+    // DTO for login
     public static class LoginRequest {
         private String email;
         private String password;

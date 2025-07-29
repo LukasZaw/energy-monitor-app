@@ -31,7 +31,7 @@ public class EnergyUsageController {
     }
 
 
-    // Pobierz dane zużycia energii dla urządzenia
+    // Fetch energy usage data for a specific device
     @GetMapping("/{deviceId}")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<List<EnergyUsage>> getEnergyUsageByDevice(@PathVariable Long deviceId) {
@@ -51,7 +51,7 @@ public class EnergyUsageController {
         return ResponseEntity.ok(energyUsageList);
     }
 
-    // Pobierz dane zużycia energii w określonym przedziale czasowym
+    // Fetch energy usage data for a specific date range
     @GetMapping("/{deviceId}/range")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<List<EnergyUsage>> getEnergyUsageByDateRange(
@@ -74,7 +74,7 @@ public class EnergyUsageController {
         return ResponseEntity.ok(energyUsageList);
     }
 
-    // Usuń dane zużycia energii
+    // Delete energy usage data
     @DeleteMapping("/{energyUsageId}")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<Void> deleteEnergyUsage(@PathVariable Long energyUsageId) {
@@ -94,6 +94,7 @@ public class EnergyUsageController {
         return ResponseEntity.noContent().build();
     }
 
+    // Generate missing energy usage entries for all devices
     @PostMapping("/generate-missing")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> generateMissingEnergyUsageForAllDevices() {
@@ -105,7 +106,7 @@ public class EnergyUsageController {
         }
     }
 
-
+    // Fetch energy usage history for the current user
     @GetMapping("/user/me/history")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<?> getEnergyUsageHistoryForCurrentUser() {
@@ -128,7 +129,7 @@ public class EnergyUsageController {
         return ResponseEntity.ok(energyUsageHistory);
     }
 
-
+    // Fetch energy share for the current user
     @GetMapping("/user/me/device-share")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<?> getDeviceEnergyShareForCurrentUser() {
@@ -144,31 +145,27 @@ public class EnergyUsageController {
             return ResponseEntity.ok("No devices found for the user");
         }
 
-        // Pobierz dane zużycia energii dla każdego urządzenia użytkownika
         List<EnergyUsage> energyUsageHistory = devices.stream()
             .flatMap(device -> energyUsageService.findByDeviceId(device.getId()).stream())
             .toList();
 
-        // Grupowanie danych według daty i urządzenia
         Map<LocalDate, Map<String, Double>> groupedData = energyUsageHistory.stream()
             .collect(Collectors.groupingBy(
-                EnergyUsage::getDate, // Grupowanie po dacie
+                EnergyUsage::getDate, 
                 Collectors.groupingBy(
-                    usage -> usage.getDevice().getName(), // Grupowanie po nazwie urządzenia
-                    Collectors.summingDouble(EnergyUsage::getEnergyKwh) // Sumowanie zużycia energii
+                    usage -> usage.getDevice().getName(), 
+                    Collectors.summingDouble(EnergyUsage::getEnergyKwh)
                 )
             ));
 
-        // Przekształcenie danych do formatu JSON
         List<Map<String, Object>> responseData = groupedData.entrySet().stream()
             .map(entry -> {
                 LocalDate date = entry.getKey();
                 Map<String, Double> deviceData = entry.getValue();
 
-                // Zwróć dane w formacie JSON
                 Map<String, Object> dayData = new HashMap<>();
                 dayData.put("date", date);
-                dayData.put("devices", deviceData); // Zwracamy surowe wartości kWh
+                dayData.put("devices", deviceData); 
                 return dayData;
             })
             .toList();
@@ -176,6 +173,7 @@ public class EnergyUsageController {
         return ResponseEntity.ok(responseData);
     }
 
+    // Fetch energy usage summary by device type for the current user
     @GetMapping("/user/me/type-summary")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<?> getEnergyUsageSummaryByDeviceType() {
@@ -191,19 +189,16 @@ public class EnergyUsageController {
             return ResponseEntity.ok("No devices found for the user");
         }
 
-        // Pobierz dane zużycia energii dla każdego urządzenia użytkownika
         List<EnergyUsage> energyUsageHistory = devices.stream()
             .flatMap(device -> energyUsageService.findByDeviceId(device.getId()).stream())
             .toList();
 
-        // Grupowanie danych według typu urządzenia i sumowanie zużycia energii
         Map<String, Double> energyUsageByType = energyUsageHistory.stream()
             .collect(Collectors.groupingBy(
-                usage -> usage.getDevice().getType(), // Grupowanie po typie urządzenia
-                Collectors.summingDouble(EnergyUsage::getEnergyKwh) // Sumowanie zużycia energii
+                usage -> usage.getDevice().getType(),
+                Collectors.summingDouble(EnergyUsage::getEnergyKwh)
             ));
 
-        // Przekształcenie danych do formatu JSON
         List<Map<String, Object>> responseData = energyUsageByType.entrySet().stream()
             .map(entry -> {
                 Map<String, Object> typeData = new HashMap<>();
@@ -216,7 +211,7 @@ public class EnergyUsageController {
         return ResponseEntity.ok(responseData);
     }
 
-
+    // Fetch energy usage by device type for the current user
     @GetMapping("/user/me/type/{type}/devices")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<?> getEnergyUsageByDeviceType(@PathVariable String type) {
@@ -260,6 +255,7 @@ public class EnergyUsageController {
         return ResponseEntity.ok(responseData);
     }
 
+    // Get total kWh tracked by the application
     @GetMapping("/summary")
     public ResponseEntity<Map<String, Object>> getTotalKwhTracked() {
         double totalKwhTracked = energyUsageService.getTotalEnergyUsage();

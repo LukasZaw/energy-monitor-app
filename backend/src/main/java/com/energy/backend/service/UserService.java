@@ -16,7 +16,7 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // Rejestracja użytkownika
+    // User registration
     @Transactional
     public User registerUser(String name, String email, String rawPassword) {
         if (userRepository.existsByEmail(email)) {
@@ -27,11 +27,11 @@ public class UserService {
         }
 
         String hashedPassword = passwordEncoder.encode(rawPassword);
-        User user = new User(name, email, hashedPassword, User.Role.USER); // Domyślna rola USER
+        User user = new User(name, email, hashedPassword, User.Role.USER); 
         return userRepository.save(user);
     }
 
-    // Logowanie użytkownika
+    // User login
     public User login(String email, String rawPassword) {
         User user = userRepository.findByEmail(email);
         if (user == null || !passwordEncoder.matches(rawPassword, user.getPassword())) {
@@ -40,12 +40,12 @@ public class UserService {
         return user;
     }
 
-    // Walidacja emaila
+    // Email validation
     public boolean isEmailTaken(String email) {
         return userRepository.existsByEmail(email);
     }
 
-    // Walidacja nazwy
+    // Name validation
     public boolean isNameValid(String name) {
         return name != null && name.length() >= 3;
     }
@@ -54,7 +54,7 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
-    //setEnergyCostPerKwh
+    // Set energy cost per kWh
     public void setEnergyCostPerKwh(Long userId, double energyCostPerKwh) {
         User user = findById(userId);
         user.setEnergyCostPerKwh(energyCostPerKwh);

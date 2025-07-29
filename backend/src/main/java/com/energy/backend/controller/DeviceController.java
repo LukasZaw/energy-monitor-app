@@ -32,7 +32,7 @@ public class DeviceController {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // Pobierz wszystkie urządzenia
+    // Fetch all devices
     @GetMapping
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<Device>> getAllDevices() {
@@ -40,7 +40,7 @@ public class DeviceController {
         return ResponseEntity.ok(devices);
     }
 
-    // Pobierz urządzenia użytkownika
+    // Fetch devices by user ID
     @GetMapping("/user/{userId}")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<List<Device>> getDevicesByUserId(@PathVariable Long userId) {
@@ -48,7 +48,7 @@ public class DeviceController {
         return ResponseEntity.ok(devices);
     }
 
-    // Dodaj nowe urządzenie
+    // Add a new device
     @PostMapping
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<Device> addDevice(@RequestBody Device device) {
@@ -81,7 +81,7 @@ public class DeviceController {
         return ResponseEntity.ok(savedDevice);
     }
 
-    // Zaktualizuj urządzenie
+    // Update an existing device
     @PutMapping("/{deviceId}")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<Device> updateDevice(@PathVariable Long deviceId, @RequestBody Device updatedDevice) {
@@ -109,7 +109,7 @@ public class DeviceController {
         return ResponseEntity.ok(savedDevice);
     }
 
-    // Usuń urządzenie
+    // Delete a device
     @DeleteMapping("/{deviceId}")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<Void> deleteDevice(@PathVariable Long deviceId) {
@@ -132,6 +132,7 @@ public class DeviceController {
         return ResponseEntity.noContent().build();
     }
 
+    // Fetch devices for the current user
     @GetMapping("/user/me")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<List<Device>> getDevicesForCurrentUser() {
@@ -144,6 +145,7 @@ public class DeviceController {
         return ResponseEntity.ok(devices);
     }
 
+    // Get a summary of devices
     @GetMapping("/summary")
     public ResponseEntity<Map<String, Object>> getDevicesSummary() {
         long devicesConnected = deviceService.countAllDevices();
@@ -154,6 +156,8 @@ public class DeviceController {
         return ResponseEntity.ok(summary);
     }
 
+
+    // Get device creation statistics for the last 14 days
     @GetMapping("/creation-stats")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<Map<String, Object>>> getDeviceCreationStats() {

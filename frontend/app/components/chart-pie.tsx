@@ -29,7 +29,6 @@ export function ChartPie() {
         const response = await axiosInstance.get("/energy-usage/user/me/type-summary")
         const data = response.data
 
-        // Formatowanie danych dla wykresu
         const formattedData = data.map((entry: any) => ({
           type: entry.type,
           totalEnergyKwh: entry.totalEnergyKwh,

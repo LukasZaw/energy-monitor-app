@@ -43,7 +43,6 @@ export function LineChartUser() {
         const response = await axiosInstance.get("/users/signup-stats")
         const data = response.data
 
-        // Formatowanie daty do skróconego formatu (np. "Jul 22")
         const formattedData = data.map(
           (entry: { date: string; count: number }) => ({
             date: new Date(entry.date).toLocaleDateString("en-US", {

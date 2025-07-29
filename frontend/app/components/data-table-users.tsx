@@ -100,10 +100,10 @@ export const columns = (setData: React.Dispatch<React.SetStateAction<User[]>>): 
         async function fetchDeviceCount() {
           try {
             const response = await axiosInstance.get(`/devices/user/${userId}`);
-            setDeviceCount(response.data.length); // Ustaw liczbę urządzeń
+            setDeviceCount(response.data.length);
           } catch (error) {
             console.error("Failed to fetch device count:", error);
-            setDeviceCount(0); // Jeśli wystąpi błąd, ustaw 0
+            setDeviceCount(0);
           }
         }
         fetchDeviceCount();
@@ -145,7 +145,6 @@ export const columns = (setData: React.Dispatch<React.SetStateAction<User[]>>): 
                 try {
                   await axiosInstance.delete(`/users/${user.id}`);
 
-                  // Usuń użytkownika z lokalnego stanu
                   setData((prevData) =>
                     prevData.filter((u) => u.id !== user.id)
                   );

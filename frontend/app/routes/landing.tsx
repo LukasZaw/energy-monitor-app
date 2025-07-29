@@ -73,7 +73,7 @@ export default function LandingPage() {
   );
 }
 
-// Animated Stat Card component
+
 function StatCard({
   label,
   value,
@@ -86,7 +86,6 @@ function StatCard({
   const [displayValue, setDisplayValue] = useState("0");
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    // Animate numbers if value is numeric
     const num = parseInt(value.replace(/[^\d]/g, "."));
     if (isNaN(num)) {
       setDisplayValue(value);
@@ -104,7 +103,7 @@ function StatCard({
       else setDisplayValue(num.toLocaleString());
     }
     requestAnimationFrame(animate);
-    // eslint-disable-next-line
+
   }, [value]);
   return (
     <div

@@ -43,7 +43,7 @@ public class EnergyUsageService {
     }
 
     public void generateMissingEnergyUsageForAllDevices() {
-        List<Device> devices = deviceService.findAllDevices(); // Pobierz wszystkie urządzenia
+        List<Device> devices = deviceService.findAllDevices();
 
         LocalDate today = LocalDate.now();
 
@@ -75,8 +75,8 @@ public class EnergyUsageService {
         return energyUsageRepository.sumAllEnergyUsage();
     }
 
-
-    @Scheduled(cron = "0 0 0 * * ?") // generating data at midnight every day
+    // Scheduled task to generate daily energy usage data for all devices
+    @Scheduled(cron = "0 0 0 * * ?")
     public void generateDailyEnergyUsage() {
         System.out.println("------ Starting daily energy usage data generation... ------ \n");
         generateMissingEnergyUsageForAllDevices();
