@@ -166,7 +166,6 @@ export default function DevicesPage() {
             </SheetContent>
           </Sheet>
 
-          {/* Edit Device Sheet */}
           {editingDevice && (
             <Sheet open={!!editingDevice} onOpenChange={() => setEditingDevice(null)}>
               <SheetContent>
